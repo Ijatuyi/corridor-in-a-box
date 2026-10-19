@@ -150,6 +150,12 @@ export function parseProbeResults(input: unknown): ProbeResult[] {
       });
     }
 
+    const sep31ReceiveAssets = Array.isArray(item.sep31ReceiveAssets)
+      ? (item.sep31ReceiveAssets as string[])
+      : Array.isArray(item.receiveAssets)
+        ? (item.receiveAssets as string[])
+        : undefined;
+
     return {
       domain,
       seps,
@@ -157,6 +163,7 @@ export function parseProbeResults(input: unknown): ProbeResult[] {
       probesPassed,
       tomlHash,
       outcomes,
+      ...(sep31ReceiveAssets ? { sep31ReceiveAssets, receiveAssets: sep31ReceiveAssets } : {}),
     };
   });
 }

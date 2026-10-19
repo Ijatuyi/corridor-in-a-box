@@ -77,6 +77,8 @@ export interface ProbeResult {
   /** Per-probe detail, in the order probes were attempted. */
   readonly outcomes: readonly ProbeOutcome[];
   /** Receive assets accepted by the anchor if SEP-31 probe passed. */
+  readonly sep31ReceiveAssets?: readonly string[];
+  /** Receive assets accepted by the anchor if SEP-31 probe passed. Kept for backwards compatibility. */
   readonly receiveAssets?: readonly string[];
   /** Raw text of stellar.toml if successfully fetched. */
   readonly toml?: string;
@@ -268,7 +270,7 @@ export async function probeAnchor(
   }
 
   // --- SEP-31: does it receive anything? ---------------------------------
-  let receiveAssets: string[] | undefined;
+  let sep31ReceiveAssets: string[] | undefined;
   const sep31 = endpoint.get(31);
   if (sep31) {
     try {
@@ -281,7 +283,7 @@ export async function probeAnchor(
         // exists, the lane does not.
         throw new Error("receive list is EMPTY — advertises SEP-31 but accepts nothing");
       }
-      receiveAssets = assets;
+      sep31ReceiveAssets = assets;
       record("sep31_info", true, `receives ${assets.join(", ")}`);
     } catch (e) {
       record("sep31_info", false, why(e));
@@ -342,7 +344,7 @@ export async function probeAnchor(
     tomlHash,
     outcomes,
     toml,
-    ...(receiveAssets ? { receiveAssets } : {}),
+    ...(sep31ReceiveAssets ? { sep31ReceiveAssets, receiveAssets: sep31ReceiveAssets } : {}),
   };
 }
 
@@ -353,6 +355,8 @@ export interface FormattedProbeResultJson {
   readonly seps: readonly SepNumber[];
   readonly probesPassed: readonly ProbeName[];
   readonly probesRun: readonly ProbeName[];
+  readonly sep31ReceiveAssets?: readonly string[];
+  readonly receiveAssets?: readonly string[];
   readonly raw: {
     readonly seps: number;
     readonly probesRun: number;
